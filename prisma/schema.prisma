@@ -1,0 +1,685 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum UserRole {
+  OWNER
+  FAMILY_MEMBER
+  CONTRACTOR
+  SERVICE_PROVIDER
+  ARCHITECT
+  ADMIN
+}
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum HouseMemberRole {
+  OWNER
+  FAMILY_MEMBER
+  CONTRACTOR
+  ARCHITECT
+}
+
+enum FeatureCategory {
+  SECURITY
+  SMART_HOME
+  ENERGY
+  WATER
+  COMFORT
+  EXTERIOR
+  PREMIUM
+}
+
+enum HouseStageStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  COMPLETED_WITH_WARNINGS
+}
+
+enum TaskType {
+  MANDATORY
+  RECOMMENDED
+  OPTIONAL
+}
+
+enum HouseTaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+  BLOCKED
+}
+
+enum AlertType {
+  DEPENDENCY
+  DECISION
+  WARNING
+  BUDGET
+  PROGRESS
+  WEATHER
+}
+
+enum AlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum MediaType {
+  PHOTO
+  VIDEO
+}
+
+enum ExpenseCategory {
+  ELECTRICAL
+  PLUMBING
+  FLOORING
+  PAINTING
+  LABOUR
+  MATERIALS
+  OTHER
+}
+
+enum CostConfidence {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ReviewReason {
+  POOR_QUALITY
+  DELAYED_WORK
+  OVER_BUDGET
+  POOR_COMMUNICATION
+  OTHER
+}
+
+enum DocumentType {
+  DRAWING
+  INVOICE
+  WARRANTY
+  PLAN
+  OTHER
+}
+
+enum WeatherAlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+// ============================================================
+// CORE MODELS
+// ============================================================
+
+model User {
+  id           String   @id @default(uuid())
+  clerkId      String   @unique
+  fullName     String
+  email        String   @unique
+  phoneNumber  String?
+  profileImage String?
+  role         UserRole @default(OWNER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  ownedHouses      House[]           @relation("HouseOwner")
+  houseMemberships HouseMember[]
+  notifications    Notification[]
+  progressUpdates  ProgressUpdate[]
+  verifications    ProgressVerification[]
+  serviceProvider  ServiceProvider?
+  auditLogs        AuditLog[]
+  claimRequests    ClaimRequest[]
+
+  @@map("users")
+}
+
+model HouseType {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  description String?
+
+  houses House[]
+
+  @@map("house_types")
+}
+
+model House {
+  id              String        @id @default(uuid())
+  ownerId         String
+  projectName     String
+  city            String
+  state           String
+  country         String        @default("India")
+  plotSize        Float?
+  houseTypeId     String
+  floors          Int           @default(1)
+  bedrooms        Int           @default(2)
+  bathrooms       Int           @default(2)
+  parkingSpaces   Int           @default(1)
+  currentProgress Float         @default(0)
+  projectStatus   ProjectStatus @default(PLANNING)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  owner         User           @relation("HouseOwner", fields: [ownerId], references: [id])
+  houseType     HouseType      @relation(fields: [houseTypeId], references: [id])
+  members       HouseMember[]
+  houseStages   HouseStage[]
+  houseTasks    HouseTask[]
+  houseFeatures HouseFeature[]
+  houseDecisions HouseDecision[]
+  houseAlerts   HouseAlert[]
+  expenses      Expense[]
+  documents     Document[]
+  progressUpdates ProgressUpdate[]
+  houseMilestones HouseMilestone[]
+  weatherAlerts  WeatherAlert[]
+  reviews        Review[]
+  auditLogs      AuditLog[]
+
+  @@map("houses")
+}
+
+model HouseMember {
+  id       String          @id @default(uuid())
+  houseId  String
+  userId   String
+  role     HouseMemberRole
+  joinedAt DateTime        @default(now())
+
+  house House @relation(fields: [houseId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([houseId, userId])
+  @@map("house_members")
+}
+
+// ============================================================
+// FEATURE SYSTEM
+// ============================================================
+
+model Feature {
+  id          String          @id @default(uuid())
+  name        String          @unique
+  category    FeatureCategory
+  description String?
+  active      Boolean         @default(true)
+
+  houseFeatures  HouseFeature[]
+  featureTasks   FeatureTask[]
+  featureDepsFrom FeatureDependency[] @relation("FeatureDependencyFrom")
+  featureDepsTo   FeatureDependency[] @relation("FeatureDependencyTo")
+
+  @@map("features")
+}
+
+model HouseFeature {
+  id        String   @id @default(uuid())
+  houseId   String
+  featureId String
+  enabled   Boolean  @default(true)
+  addedAt   DateTime @default(now())
+
+  house   House   @relation(fields: [houseId], references: [id], onDelete: Cascade)
+  feature Feature @relation(fields: [featureId], references: [id])
+
+  @@unique([houseId, featureId])
+  @@map("house_features")
+}
+
+// ============================================================
+// STAGE & TASK SYSTEM
+// ============================================================
+
+model Stage {
+  id           String  @id @default(uuid())
+  name         String  @unique
+  description  String?
+  displayOrder Int
+  active       Boolean @default(true)
+
+  tasks       Task[]
+  houseStages HouseStage[]
+  decisions   Decision[]
+  alerts      Alert[]
+  costEstimates CostEstimate[]
+
+  @@map("stages")
+}
+
+model HouseStage {
+  id          String           @id @default(uuid())
+  houseId     String
+  stageId     String
+  status      HouseStageStatus @default(NOT_STARTED)
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  house House @relation(fields: [houseId], references: [id], onDelete: Cascade)
+  stage Stage @relation(fields: [stageId], references: [id])
+
+  @@unique([houseId, stageId])
+  @@map("house_stages")
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  stageId     String
+  name        String
+  description String?
+  taskType    TaskType @default(MANDATORY)
+  weight      Int      @default(10)
+  active      Boolean  @default(true)
+
+  stage      Stage      @relation(fields: [stageId], references: [id])
+  houseTasks HouseTask[]
+  depsFrom   TaskDependency[] @relation("TaskDependencyFrom")
+  depsTo     TaskDependency[] @relation("TaskDependencyTo")
+  featureTasks FeatureTask[]
+
+  @@map("tasks")
+}
+
+model HouseTask {
+  id          String          @id @default(uuid())
+  houseId     String
+  taskId      String
+  status      HouseTaskStatus @default(PENDING)
+  notes       String?
+  completedAt DateTime?
+
+  house House @relation(fields: [houseId], references: [id], onDelete: Cascade)
+  task  Task  @relation(fields: [taskId], references: [id])
+
+  @@unique([houseId, taskId])
+  @@map("house_tasks")
+}
+
+model TaskDependency {
+  id              String @id @default(uuid())
+  taskId          String
+  dependsOnTaskId String
+
+  task      Task @relation("TaskDependencyFrom", fields: [taskId], references: [id])
+  dependsOn Task @relation("TaskDependencyTo", fields: [dependsOnTaskId], references: [id])
+
+  @@unique([taskId, dependsOnTaskId])
+  @@map("task_dependencies")
+}
+
+model FeatureTask {
+  id        String @id @default(uuid())
+  featureId String
+  taskId    String
+
+  feature Feature @relation(fields: [featureId], references: [id])
+  task    Task    @relation(fields: [taskId], references: [id])
+
+  @@unique([featureId, taskId])
+  @@map("feature_tasks")
+}
+
+model FeatureDependency {
+  id                String @id @default(uuid())
+  featureId         String
+  dependsOnFeatureId String
+
+  feature   Feature @relation("FeatureDependencyFrom", fields: [featureId], references: [id])
+  dependsOn Feature @relation("FeatureDependencyTo", fields: [dependsOnFeatureId], references: [id])
+
+  @@unique([featureId, dependsOnFeatureId])
+  @@map("feature_dependencies")
+}
+
+// ============================================================
+// DECISION SYSTEM
+// ============================================================
+
+model Decision {
+  id          String  @id @default(uuid())
+  stageId     String
+  title       String
+  description String?
+  required    Boolean @default(false)
+  active      Boolean @default(true)
+
+  stage          Stage           @relation(fields: [stageId], references: [id])
+  houseDecisions HouseDecision[]
+
+  @@map("decisions")
+}
+
+model HouseDecision {
+  id            String    @id @default(uuid())
+  houseId       String
+  decisionId    String
+  selectedValue String?
+  notes         String?
+  completedAt   DateTime?
+
+  house    House    @relation(fields: [houseId], references: [id], onDelete: Cascade)
+  decision Decision @relation(fields: [decisionId], references: [id])
+
+  @@unique([houseId, decisionId])
+  @@map("house_decisions")
+}
+
+// ============================================================
+// ALERT SYSTEM
+// ============================================================
+
+model Alert {
+  id          String        @id @default(uuid())
+  stageId     String?
+  type        AlertType
+  title       String
+  description String?
+  severity    AlertSeverity @default(MEDIUM)
+  active      Boolean       @default(true)
+
+  stage       Stage?       @relation(fields: [stageId], references: [id])
+  houseAlerts HouseAlert[]
+
+  @@map("alerts")
+}
+
+model HouseAlert {
+  id           String   @id @default(uuid())
+  houseId      String
+  alertId      String
+  acknowledged Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  house House @relation(fields: [houseId], references: [id], onDelete: Cascade)
+  alert Alert @relation(fields: [alertId], references: [id])
+
+  @@map("house_alerts")
+}
+
+// ============================================================
+// PROGRESS SYSTEM
+// ============================================================
+
+model ProgressUpdate {
+  id          String   @id @default(uuid())
+  houseId     String
+  submittedBy String
+  title       String
+  description String?
+  createdAt   DateTime @default(now())
+
+  house        House                  @relation(fields: [houseId], references: [id], onDelete: Cascade)
+  submitter    User                   @relation(fields: [submittedBy], references: [id])
+  media        ProgressMedia[]
+  verification ProgressVerification?
+
+  @@map("progress_updates")
+}
+
+model ProgressMedia {
+  id        String    @id @default(uuid())
+  updateId  String
+  fileUrl   String
+  mediaType MediaType
+
+  update ProgressUpdate @relation(fields: [updateId], references: [id], onDelete: Cascade)
+
+  @@map("progress_media")
+}
+
+model ProgressVerification {
+  id         String    @id @default(uuid())
+  updateId   String    @unique
+  verifiedBy String
+  approved   Boolean   @default(false)
+  feedback   String?
+  verifiedAt DateTime  @default(now())
+
+  update     ProgressUpdate @relation(fields: [updateId], references: [id], onDelete: Cascade)
+  verifier   User           @relation(fields: [verifiedBy], references: [id])
+
+  @@map("progress_verifications")
+}
+
+// ============================================================
+// BUDGET SYSTEM
+// ============================================================
+
+model Expense {
+  id        String          @id @default(uuid())
+  houseId   String
+  category  ExpenseCategory
+  amount    Float
+  notes     String?
+  createdAt DateTime        @default(now())
+
+  house House @relation(fields: [houseId], references: [id], onDelete: Cascade)
+
+  @@map("expenses")
+}
+
+model CostEstimate {
+  id          String         @id @default(uuid())
+  stageId     String
+  city        String
+  category    String
+  minCost     Float
+  maxCost     Float
+  confidence  CostConfidence @default(MEDIUM)
+  sourceCount Int            @default(0)
+
+  stage Stage @relation(fields: [stageId], references: [id])
+
+  @@map("cost_estimates")
+}
+
+// ============================================================
+// SERVICE PROVIDER SYSTEM
+// ============================================================
+
+model ServiceCategory {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  description String?
+
+  providerCategories ServiceProviderCategory[]
+
+  @@map("service_categories")
+}
+
+model ServiceProvider {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  businessName String
+  description  String?
+  verified     Boolean  @default(false)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  user          User                     @relation(fields: [userId], references: [id])
+  categories    ServiceProviderCategory[]
+  serviceAreas  ServiceArea[]
+  reviews       Review[]
+  claimRequests ClaimRequest[]
+
+  @@map("service_providers")
+}
+
+model ServiceProviderCategory {
+  id         String @id @default(uuid())
+  providerId String
+  categoryId String
+
+  provider ServiceProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  category ServiceCategory @relation(fields: [categoryId], references: [id])
+
+  @@unique([providerId, categoryId])
+  @@map("service_provider_categories")
+}
+
+model ServiceArea {
+  id         String @id @default(uuid())
+  providerId String
+  city       String
+  radius     Float  @default(50)
+
+  provider ServiceProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, city])
+  @@map("service_areas")
+}
+
+model ClaimRequest {
+  id          String   @id @default(uuid())
+  providerId  String
+  claimantId  String
+  status      String   @default("PENDING")
+  adminNotes  String?
+  createdAt   DateTime @default(now())
+  reviewedAt  DateTime?
+
+  provider ServiceProvider @relation(fields: [providerId], references: [id])
+  claimant User            @relation(fields: [claimantId], references: [id])
+
+  @@map("claim_requests")
+}
+
+// ============================================================
+// REVIEW SYSTEM
+// ============================================================
+
+model Review {
+  id             String        @id @default(uuid())
+  providerId     String
+  houseId        String
+  wouldHireAgain Boolean
+  reason         ReviewReason?
+  createdAt      DateTime      @default(now())
+
+  provider ServiceProvider @relation(fields: [providerId], references: [id])
+  house    House           @relation(fields: [houseId], references: [id], onDelete: Cascade)
+
+  @@map("reviews")
+}
+
+// ============================================================
+// DOCUMENT VAULT
+// ============================================================
+
+model Document {
+  id           String       @id @default(uuid())
+  houseId      String
+  name         String
+  documentType DocumentType @default(OTHER)
+  fileUrl      String
+  uploadedAt   DateTime     @default(now())
+
+  house House @relation(fields: [houseId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
+
+// ============================================================
+// NOTIFICATION SYSTEM
+// ============================================================
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  body      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+// ============================================================
+// MILESTONE SYSTEM
+// ============================================================
+
+model Milestone {
+  id          String  @id @default(uuid())
+  title       String  @unique
+  description String?
+  active      Boolean @default(true)
+
+  houseMilestones HouseMilestone[]
+
+  @@map("milestones")
+}
+
+model HouseMilestone {
+  id          String   @id @default(uuid())
+  houseId     String
+  milestoneId String
+  achievedAt  DateTime @default(now())
+
+  house     House     @relation(fields: [houseId], references: [id], onDelete: Cascade)
+  milestone Milestone @relation(fields: [milestoneId], references: [id])
+
+  @@unique([houseId, milestoneId])
+  @@map("house_milestones")
+}
+
+// ============================================================
+// WEATHER SYSTEM (future-ready)
+// ============================================================
+
+model WeatherAlert {
+  id           String               @id @default(uuid())
+  houseId      String
+  alertMessage String
+  severity     WeatherAlertSeverity @default(MEDIUM)
+  createdAt    DateTime             @default(now())
+
+  house House @relation(fields: [houseId], references: [id], onDelete: Cascade)
+
+  @@map("weather_alerts")
+}
+
+// ============================================================
+// AUDIT LOG
+// ============================================================
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  houseId   String?
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  user  User   @relation(fields: [userId], references: [id])
+  house House? @relation(fields: [houseId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
