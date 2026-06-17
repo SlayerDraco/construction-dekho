@@ -1,4 +1,5 @@
 import { prisma } from './prisma'
+import { Prisma } from '@prisma/client'
 
 export type AuditAction =
   | 'STAGE_COMPLETED'
@@ -48,7 +49,7 @@ export async function createAuditLog({
         action,
         entity,
         entityId,
-        metadata: metadata ?? {},
+        metadata: (metadata ?? {}) as Prisma.InputJsonValue,
       },
     })
   } catch (err) {
