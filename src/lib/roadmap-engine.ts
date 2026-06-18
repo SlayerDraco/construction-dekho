@@ -39,43 +39,29 @@ export async function initializeHouseRoadmap(houseId: string): Promise<void> {
         },
       })
 
-      for (const task of stage.tasks) {
-        await prisma.houseTask.upsert({
-          where: {
-            houseId_taskId: {
-              houseId,
-              taskId: task.id,
-            },
-          },
-          update: {},
-          create: {
-            houseId,
-            taskId: task.id,
-            status: 'PENDING',
-          },
-        })
-      }
+      await prisma.houseTask.createMany({
+        data: stage.tasks.map((task) => ({
+          houseId,
+          taskId: task.id,
+          status: 'PENDING',
+        })),
+        skipDuplicates: true,
+      })
+
+      console.log('STAGE CREATED', stage.name)
     }
 
     const allDecisions = await prisma.decision.findMany({
       where: { active: true },
     })
 
-    for (const decision of allDecisions) {
-      await prisma.houseDecision.upsert({
-        where: {
-          houseId_decisionId: {
-            houseId,
-            decisionId: decision.id,
-          },
-        },
-        update: {},
-        create: {
-          houseId,
-          decisionId: decision.id,
-        },
-      })
-    }
+    await prisma.houseDecision.createMany({
+      data: allDecisions.map((decision) => ({
+        houseId,
+        decisionId: decision.id,
+      })),
+      skipDuplicates: true,
+    })
 
     console.log('ROADMAP COMPLETE')
   } catch (err) {
