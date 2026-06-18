@@ -93,7 +93,8 @@ export async function POST(request: NextRequest) {
     })
   }
 
-  await initializeHouseRoadmap(house.id)
+  //await initializeHouseRoadmap(house.id)
+  console.log('ROADMAP SKIPPED')
   await createAuditLog({ userId: (user as any).id, houseId: house.id, action: 'HOUSE_CREATED', entity: 'House', entityId: house.id, metadata: { projectName: data.projectName } })
 
   const fullHouse = await prisma.house.findUnique({ where: { id: house.id }, include: { houseType: true, houseStages: { include: { stage: true } } } })
