@@ -6,11 +6,63 @@ import { prisma } from './prisma'
 // ============================================================
 
 export async function initializeHouseRoadmap(houseId: string): Promise<void> {
-  const stages = await prisma.stage.findMany({
-    where: { active: true },
-    orderBy: { displayOrder: 'asc' },
-    include: { tasks: { where: { active: true } } },
-  })
+  try {
+    console.log('ROADMAP START', houseId)
+
+    const stages = await prisma.stage.findMany({
+      where: { active: true },
+      orderBy: { displayOrder: 'asc' },
+      include: {
+        tasks: {
+          where: { active: true },
+        },
+      },
+    })
+
+    console.log('STAGES FOUND', stages.length)
+
+    const houseFeatures = await prisma.houseFeature.findMany({
+      where: { houseId, enabled: true },
+      include: {
+        feature: {
+          include: {
+            featureTasks: {
+              include: {
+                task: true,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    console.log('FEATURES FOUND', houseFeatures.length)
+
+    for (const stage of stages) {
+      console.log('CREATING STAGE', stage.name)
+
+      await prisma.houseStage.upsert({
+        where: {
+          houseId_stageId: {
+            houseId,
+            stageId: stage.id,
+          },
+        },
+        update: {},
+        create: {
+          houseId,
+          stageId: stage.id,
+          status: 'NOT_STARTED',
+        },
+      })
+    }
+
+    console.log('STAGES CREATED')
+  } catch (err) {
+    console.error('ROADMAP ENGINE FAILED', err)
+    throw err
+  }
+}
 
   const houseFeatures = await prisma.houseFeature.findMany({
     where: { houseId, enabled: true },
