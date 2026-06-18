@@ -78,14 +78,56 @@ export async function requireHouseAccess(houseId: string, permission: string) {
   return { user, member, error: null }
 }
 
-export async function syncClerkUser(clerkId: string, data: {
-  fullName: string
-  email: string
-  profileImage?: string
-}) {
+export async function syncClerkUser(
+  clerkId: string,
+  data: {
+    fullName: string
+    email: string
+    profileImage?: string
+  }
+) {
+  console.log('SYNC USER', {
+    clerkId,
+    email: data.email,
+  })
+
+  const existingByClerk = await prisma.user.findUnique({
+    where: { clerkId },
+  })
+
+  console.log('EXISTING BY CLERK', existingByClerk)
+
+  const existingByEmail = await prisma.user.findUnique({
+    where: { email: data.email },
+  })
+
+  console.log('EXISTING BY EMAIL', existingByEmail)
+
+  // User already exists with same email but different clerkId
+  if (existingByEmail && !existingByClerk) {
+    return prisma.user.update({
+      where: { email: data.email },
+      data: {
+        clerkId,
+        fullName: data.fullName,
+        profileImage: data.profileImage,
+      },
+    })
+  }
+
   return prisma.user.upsert({
     where: { clerkId },
-    update: { fullName: data.fullName, email: data.email, profileImage: data.profileImage },
-    create: { clerkId, fullName: data.fullName, email: data.email, profileImage: data.profileImage, role: 'OWNER' as any },
+    update: {
+      fullName: data.fullName,
+      email: data.email,
+      profileImage: data.profileImage,
+    },
+    create: {
+      clerkId,
+      fullName: data.fullName,
+      email: data.email,
+      profileImage: data.profileImage,
+      role: 'OWNER' as any,
+    },
   })
 }
