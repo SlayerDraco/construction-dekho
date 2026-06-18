@@ -1,5 +1,5 @@
-import { prisma } from './prisma'
 import { Prisma } from '@prisma/client'
+import { prisma } from './prisma'
 
 export type AuditAction =
   | 'STAGE_COMPLETED'
@@ -39,7 +39,7 @@ export async function createAuditLog({
   action: AuditAction
   entity: string
   entityId?: string
-  metadata?: Record<string, unknown>
+  metadata?: Prisma.InputJsonValue
 }): Promise<void> {
   try {
     await prisma.auditLog.create({
@@ -49,11 +49,10 @@ export async function createAuditLog({
         action,
         entity,
         entityId,
-        metadata: (metadata ?? {}) as Prisma.InputJsonValue,
+        metadata: metadata ?? Prisma.JsonNull,
       },
     })
   } catch (err) {
-    // Audit log failures should not break core flows
     console.error('[AuditLog] Failed to create audit log:', err)
   }
 }

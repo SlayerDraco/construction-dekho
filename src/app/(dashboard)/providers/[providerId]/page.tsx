@@ -22,12 +22,7 @@ export default async function ProviderDetailPage({
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
-  const user = await prisma.user.findUnique({ 
-    where: { clerkId: userId },
-    include: {
-      ownedHouses: { select: { id: true, projectName: true } }
-    }
-  })
+  const user = await prisma.user.findUnique({ where: { clerkId: userId } })
   if (!user) redirect('/onboarding')
 
   const provider = await prisma.serviceProvider.findUnique({
@@ -35,7 +30,6 @@ export default async function ProviderDetailPage({
     include: {
       categories: { include: { category: true } },
       serviceAreas: true,
-      houseProviders: true,
       reviews: {
         include: { house: { select: { projectName: true, city: true } } },
         orderBy: { createdAt: 'desc' },
@@ -71,7 +65,6 @@ export default async function ProviderDetailPage({
         houseId={houseId}
         canReview={canReview}
         currentUserId={user.id}
-        userHouses={user.ownedHouses}
       />
     </div>
   )

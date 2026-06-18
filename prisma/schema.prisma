@@ -160,6 +160,7 @@ model HouseType {
   id          String  @id @default(uuid())
   name        String  @unique
   description String?
+
   houses House[]
 
   @@map("house_types")
@@ -187,7 +188,6 @@ model House {
   owner         User           @relation("HouseOwner", fields: [ownerId], references: [id])
   houseType     HouseType      @relation(fields: [houseTypeId], references: [id])
   members       HouseMember[]
-  houseProviders HouseProvider[]
   houseStages   HouseStage[]
   houseTasks    HouseTask[]
   houseFeatures HouseFeature[]
@@ -216,19 +216,6 @@ model HouseMember {
 
   @@unique([houseId, userId])
   @@map("house_members")
-}
-
-model HouseProvider {
-  id         String   @id @default(uuid())
-  houseId    String
-  providerId String
-  assignedAt DateTime @default(now())
-
-  house    House           @relation(fields: [houseId], references: [id], onDelete: Cascade)
-  provider ServiceProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-
-  @@unique([houseId, providerId])
-  @@map("house_providers")
 }
 
 // ============================================================
@@ -393,6 +380,7 @@ model HouseDecision {
   selectedValue String?
   notes         String?
   completedAt   DateTime?
+
   house    House    @relation(fields: [houseId], references: [id], onDelete: Cascade)
   decision Decision @relation(fields: [decisionId], references: [id])
 
@@ -413,7 +401,7 @@ model Alert {
   severity    AlertSeverity @default(MEDIUM)
   active      Boolean       @default(true)
 
-  stage       Stage?        @relation(fields: [stageId], references: [id])
+  stage       Stage?       @relation(fields: [stageId], references: [id])
   houseAlerts HouseAlert[]
 
   @@map("alerts")
@@ -448,6 +436,7 @@ model ProgressUpdate {
   submitter    User                   @relation(fields: [submittedBy], references: [id])
   media        ProgressMedia[]
   verification ProgressVerification?
+
   @@map("progress_updates")
 }
 
@@ -516,6 +505,7 @@ model ServiceCategory {
   id          String  @id @default(uuid())
   name        String  @unique
   description String?
+
   providerCategories ServiceProviderCategory[]
 
   @@map("service_categories")
@@ -533,7 +523,6 @@ model ServiceProvider {
   user          User                     @relation(fields: [userId], references: [id])
   categories    ServiceProviderCategory[]
   serviceAreas  ServiceArea[]
-  houseProviders HouseProvider[]
   reviews       Review[]
   claimRequests ClaimRequest[]
 
@@ -587,7 +576,6 @@ model Review {
   id             String        @id @default(uuid())
   providerId     String
   houseId        String
-  rating         Int           @default(5)
   wouldHireAgain Boolean
   reason         ReviewReason?
   createdAt      DateTime      @default(now())
@@ -665,7 +653,7 @@ model HouseMilestone {
 // ============================================================
 
 model WeatherAlert {
-  id           String                @id @default(uuid())
+  id           String               @id @default(uuid())
   houseId      String
   alertMessage String
   severity     WeatherAlertSeverity @default(MEDIUM)
