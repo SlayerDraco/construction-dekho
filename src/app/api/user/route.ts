@@ -41,3 +41,8 @@ export async function GET(_request: NextRequest) {
 
   return NextResponse.json(user)
 }
+
+console.log(
+  "DB HOST:",
+  process.env.DATABASE_URL?.split("@")[1]?.split("/")[0]
+)
