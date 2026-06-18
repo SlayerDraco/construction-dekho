@@ -93,6 +93,7 @@ export async function POST(request: NextRequest) {
     })
   }
 
+await initializeHouseRoadmap(house.id)
 await createAuditLog({
   userId: (user as any).id,
   houseId: house.id,
