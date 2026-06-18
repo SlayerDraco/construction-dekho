@@ -21,23 +21,6 @@ export async function initializeHouseRoadmap(houseId: string): Promise<void> {
 
     console.log('STAGES FOUND', stages.length)
 
-    const houseFeatures = await prisma.houseFeature.findMany({
-      where: { houseId, enabled: true },
-      include: {
-        feature: {
-          include: {
-            featureTasks: {
-              include: {
-                task: true,
-              },
-            },
-          },
-        },
-      },
-    })
-
-    console.log('FEATURES FOUND', houseFeatures.length)
-
     for (const stage of stages) {
       console.log('CREATING STAGE', stage.name)
 
@@ -55,49 +38,49 @@ export async function initializeHouseRoadmap(houseId: string): Promise<void> {
           status: 'NOT_STARTED',
         },
       })
+
+      for (const task of stage.tasks) {
+        await prisma.houseTask.upsert({
+          where: {
+            houseId_taskId: {
+              houseId,
+              taskId: task.id,
+            },
+          },
+          update: {},
+          create: {
+            houseId,
+            taskId: task.id,
+            status: 'PENDING',
+          },
+        })
+      }
     }
 
-    console.log('STAGES CREATED')
+    const allDecisions = await prisma.decision.findMany({
+      where: { active: true },
+    })
+
+    for (const decision of allDecisions) {
+      await prisma.houseDecision.upsert({
+        where: {
+          houseId_decisionId: {
+            houseId,
+            decisionId: decision.id,
+          },
+        },
+        update: {},
+        create: {
+          houseId,
+          decisionId: decision.id,
+        },
+      })
+    }
+
+    console.log('ROADMAP COMPLETE')
   } catch (err) {
     console.error('ROADMAP ENGINE FAILED', err)
     throw err
-  }
-}
-
-  const houseFeatures = await prisma.houseFeature.findMany({
-    where: { houseId, enabled: true },
-    include: {
-      feature: { include: { featureTasks: { include: { task: true } } } },
-    },
-  })
-
-  const injectedTaskIds = new Set(
-    houseFeatures.flatMap((hf: any) => hf.feature.featureTasks.map((ft: any) => ft.taskId))
-  )
-
-  for (const stage of stages) {
-    await prisma.houseStage.upsert({
-      where: { houseId_stageId: { houseId, stageId: stage.id } },
-      update: {},
-      create: { houseId, stageId: stage.id, status: 'NOT_STARTED' },
-    })
-
-    for (const task of stage.tasks) {
-      await prisma.houseTask.upsert({
-        where: { houseId_taskId: { houseId, taskId: task.id } },
-        update: {},
-        create: { houseId, taskId: task.id, status: 'PENDING' },
-      })
-    }
-  }
-
-  const allDecisions = await prisma.decision.findMany({ where: { active: true } })
-  for (const decision of allDecisions) {
-    await prisma.houseDecision.upsert({
-      where: { houseId_decisionId: { houseId, decisionId: decision.id } },
-      update: {},
-      create: { houseId, decisionId: decision.id },
-    })
   }
 }
 

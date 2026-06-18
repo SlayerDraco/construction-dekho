@@ -93,19 +93,16 @@ export async function POST(request: NextRequest) {
     })
   }
 
-try {
-  await initializeHouseRoadmap(house.id)
-  console.log('ROADMAP OK')
-} catch (e) {
-  console.error('ROADMAP FAILED', e)
-}
-
-try {
-  await createAuditLog(...)
-  console.log('AUDIT OK')
-} catch (e) {
-  console.error('AUDIT FAILED', e)
-}
+await createAuditLog({
+  userId: (user as any).id,
+  houseId: house.id,
+  action: 'HOUSE_CREATED',
+  entity: 'House',
+  entityId: house.id,
+  metadata: {
+    projectName: data.projectName,
+  },
+})
 
   const fullHouse = await prisma.house.findUnique({ where: { id: house.id }, include: { houseType: true, houseStages: { include: { stage: true } } } })
   return NextResponse.json(fullHouse, { status: 201 })
