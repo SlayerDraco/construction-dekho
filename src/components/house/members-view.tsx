@@ -97,7 +97,7 @@ export function MembersView({ houseId, houseName, owner, members: initialMembers
         {/* Owner */}
         <Card padding="sm">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center text-sm font-bold text-white dark:text-zinc-900 shrink-0">
+            <div className="w-10 h-10 rounded-full bg-zinc-900 dark:bg-accent flex items-center justify-center text-sm font-bold text-white dark:text-zinc-950 shrink-0">
               {owner?.fullName?.[0] ?? '?'}
             </div>
             <div className="flex-1 min-w-0">

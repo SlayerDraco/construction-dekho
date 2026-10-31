@@ -135,7 +135,7 @@ export function TasksView({ houseId, houseName, houseTasks: initialTasks, canEdi
               placeholder="Search tasks..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-8 pl-8 pr-3 text-xs rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-300"
+              className="w-full h-8 pl-8 pr-3 text-xs rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:focus:ring-accent/70"
             />
           </div>
 
@@ -147,7 +147,7 @@ export function TasksView({ houseId, houseName, houseTasks: initialTasks, canEdi
                 onClick={() => setFilterStatus(s)}
                 className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                   filterStatus === s
-                    ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
+                    ? 'bg-zinc-900 dark:bg-accent text-white dark:text-zinc-950'
                     : 'border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300'
                 }`}
               >
@@ -163,7 +163,7 @@ export function TasksView({ houseId, houseName, houseTasks: initialTasks, canEdi
             onClick={() => setFilterStage('all')}
             className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${
               filterStage === 'all'
-                ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
+                ? 'bg-zinc-900 dark:bg-accent text-white dark:text-zinc-950'
                 : 'border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-zinc-300'
             }`}
           >
@@ -175,7 +175,7 @@ export function TasksView({ houseId, houseName, houseTasks: initialTasks, canEdi
               onClick={() => setFilterStage(s)}
               className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${
                 filterStage === s
-                  ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
+                  ? 'bg-zinc-900 dark:bg-accent text-white dark:text-zinc-950'
                   : 'border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-zinc-300'
               }`}
             >

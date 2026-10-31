@@ -55,8 +55,8 @@ export function ProgressBar({
   const heights = { sm: 'h-1', md: 'h-2', lg: 'h-3' }
 
   const colors = {
-    default: 'bg-zinc-900 dark:bg-zinc-100',
-    success: 'bg-green-500',
+    default: 'bg-brand-500',
+    success: 'bg-emerald-500 dark:bg-accent',
     warning: 'bg-yellow-500',
     danger: 'bg-red-500',
   }
@@ -119,7 +119,7 @@ export function EmptyState({
 // ---- SPINNER ----
 export function Spinner({ className }: { className?: string }) {
   return (
-    <div className={cn('animate-spin rounded-full border-2 border-zinc-200 dark:border-zinc-700 border-t-zinc-900 dark:border-t-zinc-100 h-6 w-6', className)} />
+    <div className={cn('animate-spin rounded-full border-2 border-zinc-200 dark:border-zinc-700 border-t-brand-600 dark:border-t-accent h-6 w-6', className)} />
   )
 }
 
@@ -185,7 +185,7 @@ export function Input({ label, error, helperText, className, id, ...props }: Inp
         className={cn(
           'h-9 w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900',
           'px-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500',
-          'focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-300',
+          'focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-accent/70',
           'disabled:opacity-50 disabled:cursor-not-allowed',
           error && 'border-red-400 focus:ring-red-400',
           className
@@ -219,7 +219,7 @@ export function Select({ label, error, options, className, id, ...props }: Selec
         className={cn(
           'h-9 w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900',
           'px-3 text-sm text-zinc-900 dark:text-zinc-100',
-          'focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-300',
+          'focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-accent/70',
           error && 'border-red-400',
           className
         )}
@@ -255,7 +255,7 @@ export function Textarea({ label, error, className, id, ...props }: TextareaProp
         className={cn(
           'w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900',
           'px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500',
-          'focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-300 resize-none',
+          'focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-accent/70 resize-none',
           error && 'border-red-400',
           className
         )}
@@ -293,8 +293,8 @@ export function Modal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className={cn('relative w-full bg-white dark:bg-zinc-900 rounded-xl shadow-xl', sizes[size])}>
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className={cn('relative w-full bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl shadow-black/30', sizes[size])}>
         <div className="px-6 py-5 border-b border-zinc-200 dark:border-zinc-800">
           <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">{title}</h2>
           {description && <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">{description}</p>}

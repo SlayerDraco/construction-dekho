@@ -18,9 +18,9 @@ export function Card({ className, children, padding = 'md', hover = false }: Car
   return (
     <div
       className={cn(
-        'bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm',
+        'bg-white dark:bg-zinc-900/80 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm shadow-zinc-900/5 dark:shadow-black/30',
         paddingClasses[padding],
-        hover && 'transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer',
+        hover && 'transition-all duration-200 hover:border-brand-500/60 hover:shadow-lg hover:shadow-brand-600/10 hover:-translate-y-0.5 cursor-pointer',
         className
       )}
     >
@@ -70,9 +70,9 @@ export function StatCard({
     <Card className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">{label}</p>
-        {Icon && <Icon className="h-4 w-4 text-zinc-400 dark:text-zinc-500" />}
+        {Icon && <span className="h-8 w-8 rounded-lg bg-brand-600/10 dark:bg-brand-600/20 flex items-center justify-center"><Icon className="h-4 w-4 text-brand-600 dark:text-accent" /></span>}
       </div>
-      <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{value}</p>
+      <p className="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-white">{value}</p>
       {sub && <p className="text-xs text-zinc-500 dark:text-zinc-400">{sub}</p>}
     </Card>
   )

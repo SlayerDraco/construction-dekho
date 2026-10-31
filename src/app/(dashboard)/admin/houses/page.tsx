@@ -84,7 +84,7 @@ export default async function AdminHousesPage({
                         <div className="flex items-center gap-2">
                           <div className="w-20 h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-zinc-900 dark:bg-zinc-100 rounded-full"
+                              className="h-full bg-brand-600 dark:bg-accent rounded-full"
                               style={{ width: `${house.currentProgress}%` }}
                             />
                           </div>

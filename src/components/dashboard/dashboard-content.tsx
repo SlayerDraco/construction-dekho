@@ -133,29 +133,29 @@ export function DashboardContent({ user, houses, notifications }: DashboardConte
     .slice(0, 4)
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div>
       {/* Header */}
-      <div className="px-6 py-6 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
-        <div className="flex items-center justify-between">
+      <div className="relative overflow-hidden border-b border-brand-700 dark:border-zinc-800 bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 dark:from-brand-700/40 dark:via-zinc-950 dark:to-zinc-950">
+        <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
+        <div className="relative max-w-6xl mx-auto px-6 md:px-8 py-8 flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-              Good morning, {user.fullName.split(' ')[0]}
+            <p className="text-xs font-semibold uppercase tracking-widest text-accent">Overview</p>
+            <h1 className="mt-1 text-2xl md:text-3xl font-semibold tracking-tight text-white">
+              Welcome back, {user.fullName.split(' ')[0]}
             </h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
+            <p className="text-sm text-brand-100 dark:text-zinc-400 mt-1">
               {houses.length === 0
                 ? 'Get started by creating your first project.'
                 : `You have ${houses.length} active project${houses.length !== 1 ? 's' : ''}.`}
             </p>
           </div>
           <Link href="/houses/new">
-            <Button leftIcon={<Plus className="h-4 w-4" />} size="sm">
-              New House
-            </Button>
+            <Button leftIcon={<Plus className="h-4 w-4" />}>New House</Button>
           </Link>
         </div>
       </div>
 
-      <div className="px-6 py-6 space-y-6">
+      <div className="max-w-6xl mx-auto px-6 md:px-8 py-8 space-y-8">
         {/* Critical alerts banner */}
         {totalAlerts > 0 && (
           <AlertBanner

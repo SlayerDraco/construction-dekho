@@ -197,7 +197,7 @@ export function HouseSettings({ house, houseTypes, allFeatures }: HouseSettingsP
                     disabled={togglingFeature === feat.id}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all disabled:opacity-50 ${
                       feat.enabled
-                        ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100'
+                        ? 'bg-zinc-900 dark:bg-accent text-white dark:text-zinc-950 border-zinc-900 dark:border-accent'
                         : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500'
                     }`}
                   >

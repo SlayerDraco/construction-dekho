@@ -33,79 +33,79 @@ export default async function AdminDashboardPage() {
       
       <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-5 flex items-center gap-4">
-          <div className="p-3 bg-blue-50 rounded-xl border border-blue-100">
-            <Users className="h-6 w-6 text-blue-600" />
+          <div className="p-3 bg-brand-100 dark:bg-brand-600/20 rounded-xl border border-brand-200 dark:border-brand-500/30">
+            <Users className="h-6 w-6 text-brand-600 dark:text-accent" />
           </div>
           <div>
             <p className="text-xs font-semibold text-zinc-500 uppercase">Total Users</p>
-            <p className="text-2xl font-bold text-zinc-900">{stats.users}</p>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{stats.users}</p>
           </div>
         </Card>
         
         <Card className="p-5 flex items-center gap-4">
-          <div className="p-3 bg-indigo-50 rounded-xl border border-indigo-100">
-            <Home className="h-6 w-6 text-indigo-600" />
+          <div className="p-3 bg-brand-100 dark:bg-brand-600/20 rounded-xl border border-brand-200 dark:border-brand-500/30">
+            <Home className="h-6 w-6 text-brand-600 dark:text-accent" />
           </div>
           <div>
             <p className="text-xs font-semibold text-zinc-500 uppercase">Total Houses</p>
-            <p className="text-2xl font-bold text-zinc-900">{stats.houses}</p>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{stats.houses}</p>
           </div>
         </Card>
 
         <Card className="p-5 flex items-center gap-4">
           <div className="p-3 bg-orange-50 rounded-xl border border-orange-100">
-            <Wrench className="h-6 w-6 text-orange-600" />
+            <Wrench className="h-6 w-6 text-orange-600 dark:text-orange-400" />
           </div>
           <div>
             <p className="text-xs font-semibold text-zinc-500 uppercase">Providers</p>
-            <p className="text-2xl font-bold text-zinc-900">{stats.providers}</p>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{stats.providers}</p>
           </div>
         </Card>
 
         <Card className="p-5 flex items-center gap-4">
           <div className="p-3 bg-purple-50 rounded-xl border border-purple-100">
-            <Star className="h-6 w-6 text-purple-600" />
+            <Star className="h-6 w-6 text-brand-600 dark:text-brand-300" />
           </div>
           <div>
             <p className="text-xs font-semibold text-zinc-500 uppercase">Reviews</p>
-            <p className="text-2xl font-bold text-zinc-900">{stats.reviews}</p>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{stats.reviews}</p>
           </div>
         </Card>
       </div>
 
       <div className="px-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="p-5">
-          <h3 className="text-sm font-semibold text-zinc-900 mb-4 flex items-center gap-2">
-            <FileText className="h-4 w-4 text-zinc-400" /> 
+          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-4 flex items-center gap-2">
+            <FileText className="h-4 w-4 text-zinc-600 dark:text-zinc-400" /> 
             Projects Activity
           </h3>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2 text-sm text-zinc-600">
+              <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
                 <div className="w-2 h-2 rounded-full bg-green-500" />
                 Active Construction
               </div>
-              <span className="font-semibold text-zinc-900">{stats.activeProjects}</span>
+              <span className="font-semibold text-zinc-900 dark:text-zinc-100">{stats.activeProjects}</span>
             </div>
             <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2 text-sm text-zinc-600">
+              <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
                 <CheckCircle className="h-4 w-4 text-blue-500" />
                 Completed Projects
               </div>
-              <span className="font-semibold text-zinc-900">{stats.completedProjects}</span>
+              <span className="font-semibold text-zinc-900 dark:text-zinc-100">{stats.completedProjects}</span>
             </div>
           </div>
         </Card>
 
         <Card className="p-5">
-          <h3 className="text-sm font-semibold text-zinc-900 mb-4 flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-zinc-400" /> 
+          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-4 flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-zinc-600 dark:text-zinc-400" /> 
             Pending Actions
           </h3>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-zinc-600">Provider Claim Requests</span>
-              <span className={`font-semibold ${stats.pendingClaims > 0 ? 'text-orange-600' : 'text-zinc-900'}`}>
+              <span className="text-sm text-zinc-600 dark:text-zinc-400">Provider Claim Requests</span>
+              <span className={`font-semibold ${stats.pendingClaims > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-zinc-900 dark:text-zinc-100'}`}>
                 {stats.pendingClaims}
               </span>
             </div>

@@ -18,7 +18,7 @@ export function SwitchProfileButton({ className }: { className?: string }) {
     <button
       onClick={handleSwitch}
       className={cn(
-        'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900',
+        'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white',
         className
       )}
     >

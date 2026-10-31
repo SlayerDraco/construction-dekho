@@ -330,7 +330,7 @@ function StageCard({ houseStage, houseTasks, houseDecisions, houseId, canEdit, o
                               placeholder="Enter your decision..."
                               value={decisionInput[decision.id] ?? ''}
                               onChange={(e) => setDecisionInput((d) => ({ ...d, [decision.id]: e.target.value }))}
-                              className="flex-1 h-8 px-2 text-xs rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-300"
+                              className="flex-1 h-8 px-2 text-xs rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:focus:ring-accent/70"
                             />
                             <Button
                               size="sm"

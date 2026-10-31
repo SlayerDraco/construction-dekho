@@ -191,8 +191,8 @@ export default function NewHousePage() {
               <div key={s.id} className="flex items-center gap-2 flex-1">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold transition-colors ${
-                    isDone ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
-                    : isActive ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
+                    isDone ? 'bg-zinc-900 dark:bg-accent text-white dark:text-zinc-950'
+                    : isActive ? 'bg-zinc-900 dark:bg-accent text-white dark:text-zinc-950'
                     : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400'
                   }`}
                 >
@@ -202,7 +202,7 @@ export default function NewHousePage() {
                   {s.title}
                 </span>
                 {i < STEPS.length - 1 && (
-                  <div className={`flex-1 h-px ${isDone ? 'bg-zinc-900 dark:bg-zinc-100' : 'bg-zinc-200 dark:bg-zinc-800'}`} />
+                  <div className={`flex-1 h-px ${isDone ? 'bg-brand-600 dark:bg-accent' : 'bg-zinc-200 dark:bg-zinc-800'}`} />
                 )}
               </div>
             )
@@ -331,7 +331,7 @@ export default function NewHousePage() {
                           onClick={() => toggleFeature(feat)}
                           className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                             selected
-                              ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100'
+                              ? 'bg-zinc-900 dark:bg-accent text-white dark:text-zinc-950 border-zinc-900 dark:border-accent'
                               : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600'
                           }`}
                         >

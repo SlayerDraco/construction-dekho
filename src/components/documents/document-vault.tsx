@@ -165,7 +165,7 @@ export function DocumentVault({ houseId, houseName, documents: initialDocs, canU
             onClick={() => setFilterType('')}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
               filterType === ''
-                ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100'
+                ? 'bg-zinc-900 dark:bg-accent text-white dark:text-zinc-950 border-zinc-900 dark:border-accent'
                 : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300'
             }`}
           >
@@ -177,7 +177,7 @@ export function DocumentVault({ houseId, houseName, documents: initialDocs, canU
               onClick={() => setFilterType(t.value)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                 filterType === t.value
-                  ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100'
+                  ? 'bg-zinc-900 dark:bg-accent text-white dark:text-zinc-950 border-zinc-900 dark:border-accent'
                   : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300'
               }`}
             >
@@ -194,7 +194,7 @@ export function DocumentVault({ houseId, houseName, documents: initialDocs, canU
             placeholder="Search documents..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full h-9 pl-9 pr-3 text-sm rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-300"
+            className="w-full h-9 pl-9 pr-3 text-sm rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-accent/70"
           />
         </div>
 

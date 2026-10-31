@@ -21,14 +21,15 @@ export function Button({
   ...props
 }: ButtonProps) {
   const base =
-    'inline-flex items-center justify-center gap-2 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 dark:focus-visible:ring-zinc-300 disabled:pointer-events-none disabled:opacity-50 rounded-lg'
+    'inline-flex items-center justify-center gap-2 font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 dark:focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-zinc-950 disabled:pointer-events-none disabled:opacity-50 rounded-lg'
 
   const variants = {
-    default: 'bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400',
-    outline: 'border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800',
-    ghost: 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800',
-    destructive: 'bg-red-600 text-white hover:bg-red-700',
-    secondary: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700',
+    // Lime highlight = the primary call to action
+    default: 'bg-accent text-zinc-950 font-semibold hover:bg-accent-dim ring-1 ring-inset ring-black/10 dark:ring-0 shadow-[0_8px_24px_-10px_rgba(212,255,36,0.55)]',
+    outline: 'border border-zinc-300 text-zinc-700 bg-transparent hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-white/5 dark:hover:border-zinc-500',
+    ghost: 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-white/5 dark:hover:text-white',
+    destructive: 'bg-red-600 text-white hover:bg-red-500',
+    secondary: 'bg-brand-600 text-white hover:bg-brand-500 shadow-[0_8px_24px_-10px_rgba(21,88,201,0.7)]',
   }
 
   const sizes = {

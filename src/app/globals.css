@@ -1,57 +1,110 @@
 @import "tailwindcss";
 
+/* Light is the base; `dark:` variants are driven by the .dark class on <html> (see theme-toggle.tsx). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ------------------------------------------------------------------
+   Brand system
+   base   #030407  (ink)
+   brand  #1558C9  (primary blue)
+   accent #D4FF24  (highlight lime)
+------------------------------------------------------------------- */
+@theme {
+  --color-accent: #D4FF24;
+  --color-accent-dim: #B9E01A;
+
+  --color-brand-50: #EEF5FF;
+  --color-brand-100: #D9E8FF;
+  --color-brand-200: #BCD7FF;
+  --color-brand-300: #8EBCFF;
+  --color-brand-400: #5B97F0;
+  --color-brand-500: #2F74DC;
+  --color-brand-600: #1558C9;
+  --color-brand-700: #1146A3;
+  --color-brand-800: #0F3A82;
+  --color-brand-900: #0C2C63;
+  --color-brand-950: #081A3A;
+
+  /* Remap the default palettes so every existing component inherits the brand. */
+  --color-zinc-50: #F5F7FB;
+  --color-zinc-100: #E9EDF5;
+  --color-zinc-200: #D3D9E6;
+  --color-zinc-300: #AEB7CA;
+  --color-zinc-400: #8791A8;
+  --color-zinc-500: #66708A;
+  --color-zinc-600: #465068;
+  --color-zinc-700: #2A3347;
+  --color-zinc-800: #171D2C;
+  --color-zinc-900: #0B0F19;
+  --color-zinc-950: #030407;
+
+  --color-blue-50: #EEF5FF;
+  --color-blue-100: #D9E8FF;
+  --color-blue-200: #BCD7FF;
+  --color-blue-300: #8EBCFF;
+  --color-blue-400: #5B97F0;
+  --color-blue-500: #2F74DC;
+  --color-blue-600: #1558C9;
+  --color-blue-700: #1146A3;
+  --color-blue-800: #0F3A82;
+  --color-blue-900: #0C2C63;
+  --color-indigo-50: #EEF5FF;
+  --color-indigo-100: #D9E8FF;
+  --color-indigo-400: #5B97F0;
+  --color-indigo-500: #2F74DC;
+  --color-indigo-600: #1558C9;
+  --color-indigo-700: #1146A3;
+}
+
 @layer base {
   :root {
     --radius: 0.5rem;
+    color-scheme: light;
   }
+  :root.dark { color-scheme: dark; }
 
   * {
     box-sizing: border-box;
+    border-color: var(--color-zinc-200);
   }
-
-  body {
-    font-feature-settings: "rlig" 1, "calt" 1;
-  }
+  .dark * { border-color: var(--color-zinc-800); }
 
   html {
     scroll-behavior: smooth;
+    background-color: #F5F7FB;
   }
-
-  *:focus-visible {
-    outline: 2px solid #4f46e5;
-    outline-offset: 2px;
-  }
+  html.dark { background-color: #030407; }
 
   body {
-    background-color: #fafafa;
-    color: #18181b;
+    background-color: #F5F7FB;
+    background-image:
+      radial-gradient(60rem 28rem at 70% -10%, rgba(21, 88, 201, 0.10), transparent 70%),
+      radial-gradient(40rem 22rem at 0% 110%, rgba(21, 88, 201, 0.05), transparent 70%);
+    background-attachment: fixed;
+    color: #0B0F19;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  .dark body {
+    background-color: #030407;
+    background-image:
+      radial-gradient(60rem 28rem at 70% -10%, rgba(21, 88, 201, 0.16), transparent 70%),
+      radial-gradient(40rem 22rem at 0% 110%, rgba(21, 88, 201, 0.08), transparent 70%);
+    color: #E9EDF5;
   }
 
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
+  *:focus-visible { outline: 2px solid #1558C9; outline-offset: 2px; }
+  .dark *:focus-visible { outline-color: #D4FF24; }
 
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
+  ::selection { background: #D4FF24; color: #030407; }
 
-  ::-webkit-scrollbar-thumb {
-    background-color: #d4d4d8;
-    border-radius: 9999px;
-  }
-
-  .dark ::-webkit-scrollbar-thumb {
-    background-color: #3f3f46;
-  }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background-color: #C5CCDB; border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background-color: #9AA4BA; }
+  .dark ::-webkit-scrollbar-thumb { background-color: #2A3347; }
+  .dark ::-webkit-scrollbar-thumb:hover { background-color: #465068; }
 
   input[type="number"]::-webkit-outer-spin-button,
-  input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-
-  input[type="number"] {
-    -moz-appearance: textfield;
-  }
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type="number"] { -moz-appearance: textfield; }
 }
