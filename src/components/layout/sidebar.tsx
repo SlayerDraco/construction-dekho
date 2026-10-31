@@ -9,6 +9,7 @@ import {
   AlertTriangle, Wrench, LogOut
 } from 'lucide-react'
 import { UserButton, SignOutButton } from '@clerk/nextjs'
+import { SwitchProfileButton } from './switch-profile-button';
 
 interface NavItem {
   href: string
@@ -118,7 +119,6 @@ export function AppSidebar({ houseId, isAdmin }: SidebarProps) {
         <SignOutButton>
           <button className="text-zinc-500 hover:text-zinc-900 flex items-center gap-2 text-sm font-medium transition-colors">
             <LogOut className="h-4 w-4" />
-            <span>Sign Out</span>
           </button>
         </SignOutButton>
       </div>
@@ -140,6 +140,10 @@ export function MobileNav({ houseId, isAdmin }: SidebarProps) {
           </Link>
         )
       })}
+    
+      <div className="mt-auto pt-4 border-t border-gray-100 w-full">
+        <SwitchProfileButton />
+      </div>
     </nav>
   )
 }

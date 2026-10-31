@@ -1,4 +1,5 @@
-import { auth } from '@clerk/nextjs/server'
+import { getCurrentUser } from '@/lib/auth';
+
 import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { PageHeader } from '@/components/layout/dashboard-layout'
@@ -19,7 +20,8 @@ export default async function ProviderDetailPage({
 }) {
   const { providerId } = await params
   const sp = await searchParams
-  const { userId } = await auth()
+  const user = await getCurrentUser();
+  const userId = user?.id;
   if (!userId) redirect('/sign-in')
 
   const user = await prisma.user.findUnique({ 

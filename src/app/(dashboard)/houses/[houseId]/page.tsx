@@ -1,4 +1,5 @@
-import { auth } from '@clerk/nextjs/server'
+import { getCurrentUser } from '@/lib/auth';
+
 import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
@@ -12,7 +13,8 @@ export async function generateMetadata({ params }: { params: Promise<{ houseId: 
 
 export default async function HousePage({ params }: { params: Promise<{ houseId: string }> }) {
   const { houseId } = await params
-  const { userId } = await auth()
+  const user = await getCurrentUser();
+  const userId = user?.id;
   if (!userId) redirect('/sign-in')
 
   const user = await prisma.user.findUnique({ where: { clerkId: userId } })

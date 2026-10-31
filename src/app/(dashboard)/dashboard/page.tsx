@@ -1,4 +1,5 @@
-import { auth } from '@clerk/nextjs/server'
+import { getCurrentUser } from '@/lib/auth';
+
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { DashboardContent } from '@/components/dashboard/dashboard-content'
@@ -6,7 +7,8 @@ import { DashboardContent } from '@/components/dashboard/dashboard-content'
 export const metadata = { title: 'Dashboard' }
 
 export default async function DashboardPage() {
-  const { userId } = await auth()
+  const user = await getCurrentUser();
+  const userId = user?.id;
   if (!userId) redirect('/sign-in')
 
   const user = await prisma.user.findUnique({ where: { clerkId: userId } })

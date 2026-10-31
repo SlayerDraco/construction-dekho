@@ -1,4 +1,5 @@
-import { auth } from '@clerk/nextjs/server'
+import { getCurrentUser } from '@/lib/auth';
+
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
@@ -12,7 +13,8 @@ import { formatDate } from '@/lib/utils'
 export const metadata = { title: 'My Houses' }
 
 export default async function HousesPage() {
-  const { userId } = await auth()
+  const user = await getCurrentUser();
+  const userId = user?.id;
   if (!userId) redirect('/sign-in')
 
   const user = await prisma.user.findUnique({ where: { clerkId: userId } })

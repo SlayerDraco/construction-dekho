@@ -1,4 +1,5 @@
-import { auth } from '@clerk/nextjs/server'
+import { getCurrentUser } from '@/lib/auth';
+
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { PageHeader } from '@/components/layout/dashboard-layout'
@@ -7,7 +8,8 @@ import { NotificationsView } from '@/components/notifications/notifications-view
 export const metadata = { title: 'Notifications' }
 
 export default async function NotificationsPage() {
-  const { userId } = await auth()
+  const user = await getCurrentUser();
+  const userId = user?.id;
   if (!userId) redirect('/sign-in')
 
   const user = await prisma.user.findUnique({ where: { clerkId: userId } })

@@ -1,4 +1,5 @@
-import { auth } from '@clerk/nextjs/server'
+import { getCurrentUser } from '@/lib/auth';
+
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { PageHeader } from '@/components/layout/dashboard-layout'
@@ -6,7 +7,8 @@ import { Card } from '@/components/ui/card'
 import { Users, Home, Wrench, Star, FileText, CheckCircle, AlertTriangle } from 'lucide-react'
 
 export default async function AdminDashboardPage() {
-  const { userId } = await auth()
+  const user = await getCurrentUser();
+  const userId = user?.id;
   if (!userId) redirect('/sign-in')
 
   const user = await prisma.user.findUnique({ where: { clerkId: userId } })

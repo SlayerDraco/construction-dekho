@@ -1,9 +1,11 @@
+import { getCurrentUser } from '@/lib/auth';
 import { NextRequest, NextResponse } from 'next/server'
-import { auth, currentUser } from '@clerk/nextjs/server'
+
 import { syncClerkUser } from '@/lib/auth'
 
 export async function POST(_request: NextRequest) {
-  const { userId } = await auth()
+  const user = await getCurrentUser();
+  const userId = user?.id;
   if (!userId) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
@@ -27,7 +29,8 @@ export async function POST(_request: NextRequest) {
 }
 
 export async function GET(_request: NextRequest) {
-  const { userId } = await auth()
+  const user = await getCurrentUser();
+  const userId = user?.id;
   if (!userId) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }

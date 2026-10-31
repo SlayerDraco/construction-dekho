@@ -1,20 +1,22 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-const isPublicRoute = createRouteMatcher([
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/api/webhooks(.*)',
-])
+export function middleware(request: NextRequest) {
+  const hasProfile = request.cookies.has('demo_profile_id');
+  const isDashboard = request.nextUrl.pathname.startsWith('/dashboard');
+  const isRoot = request.nextUrl.pathname === '/';
 
-export default clerkMiddleware(async (auth, request) => {
-  if (!isPublicRoute(request)) {
-    await auth.protect()
+  if (isDashboard && !hasProfile) {
+    return NextResponse.redirect(new URL('/', request.url));
   }
-})
+
+  if (isRoot && hasProfile) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
+  return NextResponse.next();
+}
 
 export const config = {
-  matcher: [
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    '/(api|trpc)(.*)',
-  ],
-}
+  matcher: ['/', '/dashboard/:path*'],
+};
