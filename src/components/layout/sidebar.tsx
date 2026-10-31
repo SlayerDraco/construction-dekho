@@ -8,7 +8,7 @@ import {
   Users, Bell, Settings, Building2, ShieldCheck, BarChart3,
   AlertTriangle, Wrench, LogOut
 } from 'lucide-react'
-import { UserButton, SignOutButton } from '@clerk/nextjs'
+
 import { SwitchProfileButton } from './switch-profile-button';
 
 interface NavItem {
@@ -115,12 +115,8 @@ export function AppSidebar({ houseId, isAdmin }: SidebarProps) {
       </nav>
 
       <div className="px-4 py-4 border-t border-zinc-200 flex items-center justify-between">
-        <UserButton />
-        <SignOutButton>
-          <button className="text-zinc-500 hover:text-zinc-900 flex items-center gap-2 text-sm font-medium transition-colors">
-            <LogOut className="h-4 w-4" />
-          </button>
-        </SignOutButton>
+        
+        
       </div>
     </aside>
   )

@@ -4,13 +4,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { syncClerkUser } from '@/lib/auth'
 
 export async function POST(_request: NextRequest) {
-  const user = await getCurrentUser();
-  const userId = user?.id;
+  const sessionUser = await getCurrentUser();
+  const userId = sessionUser?.id;
   if (!userId) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
-  const clerkUser = await currentUser()
+  const clerkUser = await getCurrentUser()
   if (!clerkUser) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 })
   }
@@ -29,14 +29,14 @@ export async function POST(_request: NextRequest) {
 }
 
 export async function GET(_request: NextRequest) {
-  const user = await getCurrentUser();
-  const userId = user?.id;
+  const sessionUser = await getCurrentUser();
+  const userId = sessionUser?.id;
   if (!userId) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
   const { prisma } = await import('@/lib/prisma')
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } })
+  const user = await prisma.user.findUnique({ where: { id: userId } })
 
   if (!user) {
     return NextResponse.json({ error: 'User not found. Call POST /api/user to sync.' }, { status: 404 })

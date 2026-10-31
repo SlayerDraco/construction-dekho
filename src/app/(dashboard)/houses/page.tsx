@@ -13,12 +13,12 @@ import { formatDate } from '@/lib/utils'
 export const metadata = { title: 'My Houses' }
 
 export default async function HousesPage() {
-  const user = await getCurrentUser();
-  const userId = user?.id;
-  if (!userId) redirect('/sign-in')
+  const sessionUser = await getCurrentUser();
+  const userId = sessionUser?.id;
+  if (!userId) redirect('/')
 
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } })
-  if (!user) redirect('/onboarding')
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  // Bypassed onboarding redirect loop
 
   const houses = await prisma.house.findMany({
     where: {

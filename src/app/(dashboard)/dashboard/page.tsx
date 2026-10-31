@@ -7,12 +7,12 @@ import { DashboardContent } from '@/components/dashboard/dashboard-content'
 export const metadata = { title: 'Dashboard' }
 
 export default async function DashboardPage() {
-  const user = await getCurrentUser();
-  const userId = user?.id;
-  if (!userId) redirect('/sign-in')
+  const sessionUser = await getCurrentUser();
+  const userId = sessionUser?.id;
+  if (!userId) redirect('/')
 
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } })
-  if (!user) redirect('/onboarding')
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  // Bypassed onboarding redirect loop
 
   // Get user's houses with progress data
   const houses = await prisma.house.findMany({

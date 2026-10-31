@@ -13,12 +13,12 @@ export default async function ProvidersPage({
   searchParams: Promise<{ q?: string; city?: string; category?: string; page?: string }>
 }) {
   const sp = await searchParams
-  const user = await getCurrentUser();
-  const userId = user?.id;
-  if (!userId) redirect('/sign-in')
+  const sessionUser = await getCurrentUser();
+  const userId = sessionUser?.id;
+  if (!userId) redirect('/')
 
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } })
-  if (!user) redirect('/onboarding')
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  // Bypassed onboarding redirect loop
 
   const page = parseInt(sp.page ?? '1')
   const limit = 20

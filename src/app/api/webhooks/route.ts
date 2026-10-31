@@ -44,11 +44,11 @@ export async function POST(req: Request) {
 
     await prisma.user.upsert({
       where: {
-        clerkId: data.id,
+        id: data.id,
       },
       update: {},
       create: {
-        clerkId: data.id,
+        id: data.id,
         email: data.email_addresses?.[0]?.email_address ?? '',
         fullName:
           `${data.first_name ?? ''} ${data.last_name ?? ''}`.trim() ||
@@ -64,7 +64,7 @@ export async function POST(req: Request) {
 
     await prisma.user.updateMany({
       where: {
-        clerkId: data.id,
+        id: data.id,
       },
       data: {
         email: data.email_addresses?.[0]?.email_address ?? '',
@@ -82,7 +82,7 @@ export async function POST(req: Request) {
     if (data?.id) {
       await prisma.user.deleteMany({
         where: {
-          clerkId: data.id,
+          id: data.id,
         },
       })
     }

@@ -7,11 +7,11 @@ import { Card } from '@/components/ui/card'
 import { Users, Home, Wrench, Star, FileText, CheckCircle, AlertTriangle } from 'lucide-react'
 
 export default async function AdminDashboardPage() {
-  const user = await getCurrentUser();
-  const userId = user?.id;
-  if (!userId) redirect('/sign-in')
+  const sessionUser = await getCurrentUser();
+  const userId = sessionUser?.id;
+  if (!userId) redirect('/')
 
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } })
+  const user = await prisma.user.findUnique({ where: { id: userId } })
   if (user?.role !== 'ADMIN') redirect('/dashboard')
 
   const stats = {

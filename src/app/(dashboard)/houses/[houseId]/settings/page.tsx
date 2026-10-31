@@ -9,12 +9,12 @@ export const metadata = { title: 'House Settings' }
 
 export default async function SettingsPage({ params }: { params: Promise<{ houseId: string }> }) {
   const { houseId } = await params
-  const user = await getCurrentUser();
-  const userId = user?.id;
-  if (!userId) redirect('/sign-in')
+  const sessionUser = await getCurrentUser();
+  const userId = sessionUser?.id;
+  if (!userId) redirect('/')
 
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } })
-  if (!user) redirect('/onboarding')
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  // Bypassed onboarding redirect loop
 
   const house = await prisma.house.findUnique({
     where: { id: houseId },

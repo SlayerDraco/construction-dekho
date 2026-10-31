@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
   // Create a placeholder user for the provider
   const placeholderUser = await prisma.user.create({
     data: {
-      clerkId: `admin-created-${Date.now()}`,
+      id: `admin-created-${Date.now()}`,
       fullName: parsed.data.businessName,
       email: `provider-${Date.now()}@hcos.placeholder`,
       role: 'SERVICE_PROVIDER',
