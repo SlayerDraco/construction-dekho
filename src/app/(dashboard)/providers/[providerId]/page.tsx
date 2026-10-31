@@ -22,7 +22,7 @@ export default async function ProviderDetailPage({
   const sp = await searchParams
   const sessionUser = await getCurrentUser();
   const userId = sessionUser?.id;
-  if (!userId) redirect('/')
+  if (!userId) redirect('/?reset=1')
 
   const user = await prisma.user.findUnique({ 
     where: { id: userId },
@@ -30,7 +30,7 @@ export default async function ProviderDetailPage({
       ownedHouses: { select: { id: true, projectName: true } }
     }
   })
-  // Bypassed onboarding redirect loop
+  if (!user) redirect('/?reset=1')
 
   const provider = await prisma.serviceProvider.findUnique({
     where: { id: providerId },

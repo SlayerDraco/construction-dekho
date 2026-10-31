@@ -10,10 +10,10 @@ export const metadata = { title: 'Notifications' }
 export default async function NotificationsPage() {
   const sessionUser = await getCurrentUser();
   const userId = sessionUser?.id;
-  if (!userId) redirect('/')
+  if (!userId) redirect('/?reset=1')
 
   const user = await prisma.user.findUnique({ where: { id: userId } })
-  // Bypassed onboarding redirect loop
+  if (!user) redirect('/?reset=1')
 
   const [notifications, unreadCount] = await Promise.all([
     prisma.notification.findMany({

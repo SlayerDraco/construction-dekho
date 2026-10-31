@@ -2,25 +2,17 @@ import { AppSidebar, MobileNav } from '@/components/layout/sidebar'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
-  houseId?: string
-  isAdmin?: boolean
+  user?: { name: string; label: string; isAdmin: boolean }
 }
 
-export function DashboardLayout({ children, houseId, isAdmin }: DashboardLayoutProps) {
+export function DashboardLayout({ children, user }: DashboardLayoutProps) {
   return (
-    <div className="flex h-screen bg-zinc-50 dark:bg-zinc-950">
-      {/* Desktop sidebar */}
+    <div className="flex h-screen bg-zinc-50">
       <div className="hidden md:flex">
-        <AppSidebar houseId={houseId} isAdmin={isAdmin} />
+        <AppSidebar user={user} />
       </div>
-
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
-        {children}
-      </main>
-
-      {/* Mobile bottom nav */}
-      <MobileNav houseId={houseId} isAdmin={isAdmin} />
+      <main className="flex-1 overflow-y-auto pb-20 md:pb-0">{children}</main>
+      <MobileNav user={user} />
     </div>
   )
 }
@@ -35,14 +27,12 @@ export function PageHeader({
   action?: React.ReactNode
 }) {
   return (
-    <div className="flex items-start justify-between px-6 py-6 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+    <div className="sticky top-0 z-10 flex items-start justify-between gap-4 px-6 md:px-8 py-5 border-b border-zinc-200 bg-white/80 backdrop-blur">
       <div>
-        <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">{title}</h1>
-        {description && (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">{description}</p>
-        )}
+        <h1 className="text-xl font-semibold tracking-tight text-zinc-900">{title}</h1>
+        {description && <p className="text-sm text-zinc-500 mt-0.5">{description}</p>}
       </div>
-      {action && <div className="ml-4 shrink-0">{action}</div>}
+      {action && <div className="shrink-0">{action}</div>}
     </div>
   )
 }

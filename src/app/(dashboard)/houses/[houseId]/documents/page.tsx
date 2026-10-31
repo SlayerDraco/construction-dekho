@@ -2,7 +2,6 @@ import { getCurrentUser } from '@/lib/auth';
 
 import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { DocumentVault } from '@/components/documents/document-vault'
 
 export const metadata = { title: 'Documents' }
@@ -11,10 +10,10 @@ export default async function DocumentsPage({ params }: { params: Promise<{ hous
   const { houseId } = await params
   const sessionUser = await getCurrentUser();
   const userId = sessionUser?.id;
-  if (!userId) redirect('/')
+  if (!userId) redirect('/?reset=1')
 
   const user = await prisma.user.findUnique({ where: { id: userId } })
-  // Bypassed onboarding redirect loop
+  if (!user) redirect('/?reset=1')
 
   const house = await prisma.house.findUnique({ where: { id: houseId } })
   if (!house) notFound()
@@ -31,7 +30,7 @@ export default async function DocumentsPage({ params }: { params: Promise<{ hous
   const canUpload = isOwner || user.role === 'ADMIN' || isMember?.role === 'ARCHITECT'
 
   return (
-    <DashboardLayout houseId={houseId}>
+    <>
       <DocumentVault
         houseId={houseId}
         houseName={house.projectName}
@@ -39,6 +38,6 @@ export default async function DocumentsPage({ params }: { params: Promise<{ hous
         canUpload={canUpload}
         canDelete={isOwner || user.role === 'ADMIN'}
       />
-    </DashboardLayout>
+    </>
   )
 }

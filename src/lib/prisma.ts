@@ -1,4 +1,4 @@
-// @ts-ignore - Prisma client is generated at build time via `npx prisma generate`
+
 import { PrismaClient } from '@prisma/client'
 
 const globalForPrisma = globalThis as unknown as {

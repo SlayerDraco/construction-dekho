@@ -2,7 +2,6 @@ import { getCurrentUser } from '@/lib/auth';
 
 import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { ProgressView } from '@/components/progress/progress-view'
 
 export const metadata = { title: 'Progress Updates' }
@@ -11,10 +10,10 @@ export default async function ProgressPage({ params }: { params: Promise<{ house
   const { houseId } = await params
   const sessionUser = await getCurrentUser();
   const userId = sessionUser?.id;
-  if (!userId) redirect('/')
+  if (!userId) redirect('/?reset=1')
 
   const user = await prisma.user.findUnique({ where: { id: userId } })
-  // Bypassed onboarding redirect loop
+  if (!user) redirect('/?reset=1')
 
   const house = await prisma.house.findUnique({ where: { id: houseId } })
   if (!house) notFound()
@@ -37,7 +36,7 @@ export default async function ProgressPage({ params }: { params: Promise<{ house
   const canVerify = isOwner || user.role === 'ADMIN'
 
   return (
-    <DashboardLayout houseId={houseId}>
+    <>
       <ProgressView
         houseId={houseId}
         houseName={house.projectName}
@@ -46,6 +45,6 @@ export default async function ProgressPage({ params }: { params: Promise<{ house
         canSubmit={canSubmit}
         canVerify={canVerify}
       />
-    </DashboardLayout>
+    </>
   )
 }

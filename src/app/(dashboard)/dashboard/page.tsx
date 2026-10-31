@@ -9,10 +9,10 @@ export const metadata = { title: 'Dashboard' }
 export default async function DashboardPage() {
   const sessionUser = await getCurrentUser();
   const userId = sessionUser?.id;
-  if (!userId) redirect('/')
+  if (!userId) redirect('/?reset=1')
 
   const user = await prisma.user.findUnique({ where: { id: userId } })
-  // Bypassed onboarding redirect loop
+  if (!user) redirect('/?reset=1')
 
   // Get user's houses with progress data
   const houses = await prisma.house.findMany({

@@ -2,7 +2,6 @@ import { getCurrentUser } from '@/lib/auth';
 
 import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { HouseSettings } from '@/components/house/house-settings'
 
 export const metadata = { title: 'House Settings' }
@@ -11,10 +10,10 @@ export default async function SettingsPage({ params }: { params: Promise<{ house
   const { houseId } = await params
   const sessionUser = await getCurrentUser();
   const userId = sessionUser?.id;
-  if (!userId) redirect('/')
+  if (!userId) redirect('/?reset=1')
 
   const user = await prisma.user.findUnique({ where: { id: userId } })
-  // Bypassed onboarding redirect loop
+  if (!user) redirect('/?reset=1')
 
   const house = await prisma.house.findUnique({
     where: { id: houseId },
@@ -36,12 +35,12 @@ export default async function SettingsPage({ params }: { params: Promise<{ house
   const enabledFeatureIds = new Set(house.houseFeatures.map((hf) => hf.featureId))
 
   return (
-    <DashboardLayout houseId={houseId}>
+    <>
       <HouseSettings
         house={{ ...house, enabledFeatureIds: Array.from(enabledFeatureIds) }}
         houseTypes={houseTypes}
         allFeatures={allFeatures.map((f) => ({ ...f, enabled: enabledFeatureIds.has(f.id) }))}
       />
-    </DashboardLayout>
+    </>
   )
 }

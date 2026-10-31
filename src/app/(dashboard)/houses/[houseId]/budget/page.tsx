@@ -2,7 +2,6 @@ import { getCurrentUser } from '@/lib/auth';
 
 import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { BudgetView } from '@/components/budget/budget-view'
 
 export const metadata = { title: 'Budget' }
@@ -11,10 +10,10 @@ export default async function BudgetPage({ params }: { params: Promise<{ houseId
   const { houseId } = await params
   const sessionUser = await getCurrentUser();
   const userId = sessionUser?.id;
-  if (!userId) redirect('/')
+  if (!userId) redirect('/?reset=1')
 
   const user = await prisma.user.findUnique({ where: { id: userId } })
-  // Bypassed onboarding redirect loop
+  if (!user) redirect('/?reset=1')
 
   const house = await prisma.house.findUnique({ where: { id: houseId } })
   if (!house) notFound()
@@ -37,7 +36,7 @@ export default async function BudgetPage({ params }: { params: Promise<{ houseId
   const canWrite = isOwner || user.role === 'ADMIN'
 
   return (
-    <DashboardLayout houseId={houseId}>
+    <>
       <BudgetView
         houseId={houseId}
         houseName={house.projectName}
@@ -46,6 +45,6 @@ export default async function BudgetPage({ params }: { params: Promise<{ houseId
         costEstimates={costEstimates}
         canWrite={canWrite}
       />
-    </DashboardLayout>
+    </>
   )
 }

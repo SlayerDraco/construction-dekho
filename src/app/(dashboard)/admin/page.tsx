@@ -9,7 +9,7 @@ import { Users, Home, Wrench, Star, FileText, CheckCircle, AlertTriangle } from 
 export default async function AdminDashboardPage() {
   const sessionUser = await getCurrentUser();
   const userId = sessionUser?.id;
-  if (!userId) redirect('/')
+  if (!userId) redirect('/?reset=1')
 
   const user = await prisma.user.findUnique({ where: { id: userId } })
   if (user?.role !== 'ADMIN') redirect('/dashboard')

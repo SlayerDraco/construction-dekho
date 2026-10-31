@@ -2,7 +2,6 @@ import { getCurrentUser } from '@/lib/auth';
 
 import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { AlertsView } from '@/components/alerts/alerts-view'
 
 export const metadata = { title: 'Alerts' }
@@ -11,10 +10,10 @@ export default async function AlertsPage({ params }: { params: Promise<{ houseId
   const { houseId } = await params
   const sessionUser = await getCurrentUser();
   const userId = sessionUser?.id;
-  if (!userId) redirect('/')
+  if (!userId) redirect('/?reset=1')
 
   const user = await prisma.user.findUnique({ where: { id: userId } })
-  // Bypassed onboarding redirect loop
+  if (!user) redirect('/?reset=1')
 
   const house = await prisma.house.findUnique({ where: { id: houseId } })
   if (!house) notFound()
@@ -37,7 +36,7 @@ export default async function AlertsPage({ params }: { params: Promise<{ houseId
   ])
 
   return (
-    <DashboardLayout houseId={houseId}>
+    <>
       <AlertsView
         houseId={houseId}
         houseName={house.projectName}
@@ -45,6 +44,6 @@ export default async function AlertsPage({ params }: { params: Promise<{ houseId
         weatherAlerts={weatherAlerts}
         canAcknowledge={isOwner || user.role === 'ADMIN'}
       />
-    </DashboardLayout>
+    </>
   )
 }

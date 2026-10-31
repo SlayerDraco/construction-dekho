@@ -7,29 +7,27 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
   title: {
-    default: 'HCOS – House Construction Operating System',
-    template: '%s | HCOS',
+    default: 'Construction Dekho – House Construction Operating System',
+    template: '%s | Construction Dekho',
   },
   description: 'Your trusted guide through every stage of house construction. Plan, track, and complete your build with confidence.',
   keywords: ['house construction', 'home building', 'construction tracking', 'India'],
   openGraph: {
     type: 'website',
     locale: 'en_IN',
-    title: 'HCOS – House Construction Operating System',
+    title: 'Construction Dekho',
     description: 'Your trusted guide through every stage of house construction.',
-    siteName: 'HCOS',
+    siteName: 'Construction Dekho',
   },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    
-      <html lang="en" suppressHydrationWarning>
-        <body className={`${inter.variable} font-sans antialiased`}>
-          {children}
-          <Toaster position="top-right" richColors closeButton />
-        </body>
-      </html>
-    
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} font-sans antialiased bg-zinc-50 text-zinc-900`}>
+        {children}
+        <Toaster position="top-right" richColors closeButton />
+      </body>
+    </html>
   )
 }

@@ -18,9 +18,9 @@ export function Card({ className, children, padding = 'md', hover = false }: Car
   return (
     <div
       className={cn(
-        'bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800',
+        'bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm',
         paddingClasses[padding],
-        hover && 'transition-shadow hover:shadow-sm cursor-pointer',
+        hover && 'transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer',
         className
       )}
     >

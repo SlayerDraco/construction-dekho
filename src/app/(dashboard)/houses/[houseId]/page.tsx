@@ -2,7 +2,6 @@ import { getCurrentUser } from '@/lib/auth';
 
 import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { HouseOverview } from '@/components/house/house-overview'
 
 export async function generateMetadata({ params }: { params: Promise<{ houseId: string }> }) {
@@ -15,10 +14,10 @@ export default async function HousePage({ params }: { params: Promise<{ houseId:
   const { houseId } = await params
   const sessionUser = await getCurrentUser();
   const userId = sessionUser?.id;
-  if (!userId) redirect('/')
+  if (!userId) redirect('/?reset=1')
 
   const user = await prisma.user.findUnique({ where: { id: userId } })
-  // Bypassed onboarding redirect loop
+  if (!user) redirect('/?reset=1')
 
   const house = await prisma.house.findUnique({
     where: { id: houseId },
@@ -66,8 +65,8 @@ export default async function HousePage({ params }: { params: Promise<{ houseId:
   if (!isOwner && !isMember && !isAdmin) redirect('/houses')
 
   return (
-    <DashboardLayout houseId={houseId}>
+    <>
       <HouseOverview house={house} currentUser={user} />
-    </DashboardLayout>
+    </>
   )
 }

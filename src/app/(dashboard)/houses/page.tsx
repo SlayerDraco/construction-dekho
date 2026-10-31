@@ -15,10 +15,10 @@ export const metadata = { title: 'My Houses' }
 export default async function HousesPage() {
   const sessionUser = await getCurrentUser();
   const userId = sessionUser?.id;
-  if (!userId) redirect('/')
+  if (!userId) redirect('/?reset=1')
 
   const user = await prisma.user.findUnique({ where: { id: userId } })
-  // Bypassed onboarding redirect loop
+  if (!user) redirect('/?reset=1')
 
   const houses = await prisma.house.findMany({
     where: {

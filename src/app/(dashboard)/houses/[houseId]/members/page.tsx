@@ -2,7 +2,6 @@ import { getCurrentUser } from '@/lib/auth';
 
 import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { MembersView } from '@/components/house/members-view'
 
 export const metadata = { title: 'Team Members' }
@@ -11,10 +10,10 @@ export default async function MembersPage({ params }: { params: Promise<{ houseI
   const { houseId } = await params
   const sessionUser = await getCurrentUser();
   const userId = sessionUser?.id;
-  if (!userId) redirect('/')
+  if (!userId) redirect('/?reset=1')
 
   const user = await prisma.user.findUnique({ where: { id: userId } })
-  // Bypassed onboarding redirect loop
+  if (!user) redirect('/?reset=1')
 
   const house = await prisma.house.findUnique({
     where: { id: houseId },
@@ -35,7 +34,7 @@ export default async function MembersPage({ params }: { params: Promise<{ houseI
   if (!isOwner && !isMember && user.role !== 'ADMIN') redirect('/houses')
 
   return (
-    <DashboardLayout houseId={houseId}>
+    <>
       <MembersView
         houseId={houseId}
         houseName={house.projectName}
@@ -44,6 +43,6 @@ export default async function MembersPage({ params }: { params: Promise<{ houseI
         canManage={isOwner || user.role === 'ADMIN'}
         currentUserId={user.id}
       />
-    </DashboardLayout>
+    </>
   )
 }

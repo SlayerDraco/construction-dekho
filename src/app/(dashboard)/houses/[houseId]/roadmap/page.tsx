@@ -2,7 +2,6 @@ import { getCurrentUser } from '@/lib/auth';
 
 import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { RoadmapView } from '@/components/roadmap/roadmap-view'
 
 export const metadata = { title: 'Roadmap' }
@@ -11,10 +10,10 @@ export default async function RoadmapPage({ params }: { params: Promise<{ houseI
   const { houseId } = await params
   const sessionUser = await getCurrentUser();
   const userId = sessionUser?.id;
-  if (!userId) redirect('/')
+  if (!userId) redirect('/?reset=1')
 
   const user = await prisma.user.findUnique({ where: { id: userId } })
-  // Bypassed onboarding redirect loop
+  if (!user) redirect('/?reset=1')
 
   const house = await prisma.house.findUnique({
     where: { id: houseId },
@@ -47,12 +46,12 @@ export default async function RoadmapPage({ params }: { params: Promise<{ houseI
   if (!isOwner && !isMember && user.role !== 'ADMIN') redirect('/houses')
 
   return (
-    <DashboardLayout houseId={houseId}>
+    <>
       <RoadmapView
         house={house}
         currentUserId={user.id}
         canEdit={isOwner || user.role === 'ADMIN'}
       />
-    </DashboardLayout>
+    </>
   )
 }
