@@ -8,6 +8,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ============================================================
@@ -152,6 +153,10 @@ model User {
   auditLogs        AuditLog[]
   claimRequests    ClaimRequest[]
 
+  // Business directory (optional associations; a listing never requires a user)
+  businessLinks      BusinessUserLink[]
+  businessAuditLogs  BusinessAuditLog[]
+
   @@map("users")
 }
 
@@ -279,6 +284,7 @@ model Stage {
   decisions   Decision[]
   alerts      Alert[]
   costEstimates CostEstimate[]
+  businessCategoryStages BusinessCategoryStage[]
 
   @@map("stages")
 }
@@ -516,6 +522,7 @@ model ServiceCategory {
   name        String  @unique
   description String?
   providerCategories ServiceProviderCategory[]
+  businessCategoryMap BusinessLegacyCategoryMap?
 
   @@map("service_categories")
 }
@@ -535,6 +542,7 @@ model ServiceProvider {
   houseProviders HouseProvider[]
   reviews       Review[]
   claimRequests ClaimRequest[]
+  businessListing BusinessListing?
 
   @@map("service_providers")
 }
@@ -693,4 +701,402 @@ model AuditLog {
   house House? @relation(fields: [houseId], references: [id], onDelete: SetNull)
 
   @@map("audit_logs")
+}
+
+
+// ============================================================
+// BUSINESS DIRECTORY (Vendor Intelligence Engine, Phase 1 foundation)
+//
+// A BusinessListing is a real-world business. It exists independently of any
+// ConstructionDekho user account. Accounts are linked optionally through
+// BusinessUserLink. The legacy ServiceProvider model is untouched and remains
+// the source of truth for existing routes until they are migrated.
+// All tables are additive: no existing table is altered, renamed or dropped.
+// ============================================================
+
+enum BusinessListingStatus {
+  DRAFT
+  PENDING_REVIEW
+  PUBLISHED
+  SUPPRESSED
+  REMOVED
+}
+
+enum BusinessVerificationStatus {
+  UNVERIFIED
+  VERIFIED
+  REVOKED
+}
+
+// Promotion is deliberately independent of verification.
+enum BusinessPromotionStatus {
+  NONE
+  FEATURED
+}
+
+enum BusinessUserRelation {
+  LEGACY_ACCOUNT
+  OWNER_CLAIM
+  REPRESENTATIVE
+}
+
+enum BusinessServiceAreaType {
+  PINCODE
+  LOCALITY
+  CITY
+  DISTRICT
+  STATE
+  RADIUS
+  NATIONWIDE
+}
+
+enum BusinessFieldOrigin {
+  SOURCE_PROVIDED
+  VENDOR_SUPPLIED
+  ADMIN_CONFIRMED
+  ADMIN_EDITED
+  MIGRATED_LEGACY
+}
+
+enum BusinessDisplayPolicy {
+  PUBLIC
+  INTERNAL_ONLY
+  RESTRICTED
+}
+
+enum SourcePolicyReviewStatus {
+  NEEDS_HUMAN_REVIEW
+  APPROVED
+  BLOCKED
+}
+
+enum BusinessSourceRecordStatus {
+  ACTIVE
+  STALE
+  REMOVED_AT_SOURCE
+  SUPPRESSED
+}
+
+enum BusinessImageStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model BusinessListing {
+  id                    String                     @id @default(uuid())
+  slug                  String                     @unique
+  name                  String
+  description           String?
+  listingStatus         BusinessListingStatus      @default(DRAFT)
+  verificationStatus    BusinessVerificationStatus @default(UNVERIFIED)
+  verificationChangedAt DateTime?
+  promotionStatus       BusinessPromotionStatus    @default(NONE)
+  website               String?
+  phone                 String?
+  email                 String?
+  operatingHours        Json?
+  dataQualityScore      Float?
+  // True for demo/test records. They must never be presented as discovered real businesses.
+  isFixture             Boolean                    @default(false)
+  // Compatibility link to the legacy provider this listing was backfilled from.
+  legacyServiceProviderId String?                  @unique
+  createdAt             DateTime                   @default(now())
+  updatedAt             DateTime                   @updatedAt
+
+  legacyProvider  ServiceProvider?          @relation(fields: [legacyServiceProviderId], references: [id], onDelete: SetNull)
+  categories      BusinessListingCategory[]
+  locations       BusinessLocation[]
+  serviceAreas    BusinessServiceArea[]
+  sourceRecords   BusinessSourceRecord[]
+  fieldProvenance BusinessFieldProvenance[]
+  images          BusinessImage[]
+  userLinks       BusinessUserLink[]
+  auditLogs       BusinessAuditLog[]
+
+  @@index([listingStatus])
+  @@index([verificationStatus])
+  @@index([name])
+  @@map("business_listings")
+}
+
+// Optional association between a registered user and a listing. Not required for a listing to exist.
+model BusinessUserLink {
+  id         String               @id @default(uuid())
+  businessId String
+  userId     String
+  relation   BusinessUserRelation
+  createdAt  DateTime             @default(now())
+
+  business BusinessListing @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, userId])
+  @@index([userId])
+  @@map("business_user_links")
+}
+
+model BusinessCategory {
+  id              String   @id @default(uuid())
+  slug            String   @unique
+  name            String
+  description     String?
+  parentId        String?
+  isActive        Boolean  @default(true)
+  displayOrder    Int      @default(0)
+  synonyms        String[]
+  discoveryTerms  String[]
+  defaultRadiusKm Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  parent           BusinessCategory?                   @relation("BusinessCategoryTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children         BusinessCategory[]                  @relation("BusinessCategoryTree")
+  listings         BusinessListingCategory[]
+  stageMappings    BusinessCategoryStage[]
+  externalMappings BusinessCategoryExternalMapping[]
+  legacyMaps       BusinessLegacyCategoryMap[]
+
+  @@index([parentId])
+  @@index([isActive, displayOrder])
+  @@map("business_categories")
+}
+
+// Categories and construction stages are separate; many-to-many with a relevance weight (ranking only, never filtering).
+model BusinessCategoryStage {
+  id         String @id @default(uuid())
+  categoryId String
+  stageId    String
+  relevance  Int    @default(1)
+
+  category BusinessCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  stage    Stage            @relation(fields: [stageId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, stageId])
+  @@index([stageId])
+  @@map("business_category_stages")
+}
+
+// Proposed mapping to an external source's own category/type code (e.g. google_places, osm). Unverified until reviewed.
+model BusinessCategoryExternalMapping {
+  id           String  @id @default(uuid())
+  categoryId   String
+  sourceKey    String
+  externalCode String
+  externalLabel String?
+
+  category BusinessCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  // Explicit short name: the auto-generated one exceeds PostgreSQL's 63-character identifier limit.
+  @@unique([categoryId, sourceKey, externalCode], map: "business_cat_ext_map_cat_src_code_key")
+  @@index([sourceKey, externalCode])
+  @@map("business_category_external_mappings")
+}
+
+// Records which new category each legacy ServiceCategory was mapped to.
+model BusinessLegacyCategoryMap {
+  id                String   @id @default(uuid())
+  serviceCategoryId String   @unique
+  categoryId        String
+  createdAt         DateTime @default(now())
+
+  serviceCategory ServiceCategory  @relation(fields: [serviceCategoryId], references: [id], onDelete: Cascade)
+  category        BusinessCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([categoryId])
+  @@map("business_legacy_category_maps")
+}
+
+model BusinessListingCategory {
+  id         String   @id @default(uuid())
+  businessId String
+  categoryId String
+  isPrimary  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  business BusinessListing  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  category BusinessCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  @@unique([businessId, categoryId])
+  @@index([categoryId])
+  @@map("business_listing_categories")
+}
+
+// Where the business physically is. Separate from where it serves (BusinessServiceArea).
+model BusinessLocation {
+  id              String   @id @default(uuid())
+  businessId      String
+  label           String?
+  addressLine1    String?
+  addressLine2    String?
+  locality        String?
+  city            String?
+  district        String?
+  state           String?
+  pincode         String?
+  country         String   @default("IN")
+  latitude        Float?
+  longitude       Float?
+  geocodeAccuracy String?
+  isPrimary       Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  business BusinessListing @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([pincode])
+  @@index([state, city])
+  @@index([latitude, longitude])
+  @@map("business_locations")
+}
+
+// Where the business serves. Many per business; independent of its physical location.
+model BusinessServiceArea {
+  id              String                  @id @default(uuid())
+  businessId      String
+  areaType        BusinessServiceAreaType
+  pincode         String?
+  locality        String?
+  city            String?
+  district        String?
+  state           String?
+  centerLatitude  Float?
+  centerLongitude Float?
+  radiusKm        Float?
+  createdAt       DateTime                @default(now())
+
+  business BusinessListing @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([areaType, pincode])
+  @@index([state, city])
+  @@map("business_service_areas")
+}
+
+// Registry of data sources and the handling rules that apply to each. Defaults are the most restrictive.
+model BusinessDataSource {
+  id                  String                   @id @default(uuid())
+  key                 String                   @unique
+  name                String
+  kind                String
+  licenceBasis        String?
+  licenceUrl          String?
+  attributionText     String?
+  permittedFields     String[]
+  maxRetentionDays    Int?
+  publicDisplayAllowed Boolean                 @default(false)
+  imagesAllowed       Boolean                  @default(false)
+  refreshIntervalDays Int?
+  deletionObligations String?
+  rateLimitNotes      String?
+  policyReviewStatus  SourcePolicyReviewStatus @default(NEEDS_HUMAN_REVIEW)
+  policyReviewedAt    DateTime?
+  notes               String?
+  isActive            Boolean                  @default(true)
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+
+  sourceRecords BusinessSourceRecord[]
+  provenance    BusinessFieldProvenance[]
+  images        BusinessImage[]
+
+  @@map("business_data_sources")
+}
+
+// A record in an external source. Not the business itself; keeps source identifiers apart from profile data.
+model BusinessSourceRecord {
+  id           String                     @id @default(uuid())
+  dataSourceId String
+  businessId   String?
+  externalId   String
+  externalUrl  String?
+  status       BusinessSourceRecordStatus @default(ACTIVE)
+  // Only populated where the source's policy allows persistence. Null by default.
+  rawPayload   Json?
+  obtainedAt   DateTime                   @default(now())
+  lastCheckedAt DateTime?
+  retainUntil  DateTime?
+  createdAt    DateTime                   @default(now())
+  updatedAt    DateTime                   @updatedAt
+
+  dataSource BusinessDataSource @relation(fields: [dataSourceId], references: [id], onDelete: Restrict)
+  business   BusinessListing?   @relation(fields: [businessId], references: [id], onDelete: SetNull)
+  provenance BusinessFieldProvenance[]
+
+  @@unique([dataSourceId, externalId])
+  @@index([businessId])
+  @@map("business_source_records")
+}
+
+model BusinessFieldProvenance {
+  id             String                @id @default(uuid())
+  businessId     String
+  fieldName      String
+  dataSourceId   String
+  sourceRecordId String?
+  origin         BusinessFieldOrigin
+  licenceBasis   String?
+  displayPolicy  BusinessDisplayPolicy @default(INTERNAL_ONLY)
+  obtainedAt     DateTime              @default(now())
+  lastCheckedAt  DateTime?
+  retainUntil    DateTime?
+  refreshBy      DateTime?
+  notes          String?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  business     BusinessListing       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  dataSource   BusinessDataSource    @relation(fields: [dataSourceId], references: [id], onDelete: Restrict)
+  sourceRecord BusinessSourceRecord? @relation(fields: [sourceRecordId], references: [id], onDelete: SetNull)
+
+  @@unique([businessId, fieldName, dataSourceId])
+  @@index([businessId])
+  @@map("business_field_provenance")
+}
+
+// Only licensed or permissioned images may be stored or shown. Otherwise the UI uses a category placeholder.
+model BusinessImage {
+  id                 String              @id @default(uuid())
+  businessId         String
+  storageKey         String?
+  url                String?
+  dataSourceId       String?
+  licence            String?
+  permissionEvidence String?
+  attribution        String?
+  allowedUse         String?
+  altText            String?
+  status             BusinessImageStatus @default(PENDING)
+  isPrimary          Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  business   BusinessListing    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  dataSource BusinessDataSource? @relation(fields: [dataSourceId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, status])
+  @@map("business_images")
+}
+
+// Sensitive administrative actions: publish/reject, merge, edit, verification, removal, category and promotion changes.
+model BusinessAuditLog {
+  id         String   @id @default(uuid())
+  businessId String?
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String?
+  before     Json?
+  after      Json?
+  reason     String?
+  createdAt  DateTime @default(now())
+
+  business BusinessListing? @relation(fields: [businessId], references: [id], onDelete: SetNull)
+  actor    User?            @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, createdAt])
+  @@index([entityType, entityId])
+  @@index([action])
+  @@map("business_audit_logs")
 }

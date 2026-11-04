@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { runDirectoryFoundation } from '../src/lib/directory/run'
 
 const prisma = new PrismaClient()
 
@@ -206,6 +207,10 @@ async function main() {
     })
   }
   await prisma.claimRequest.deleteMany({ where: { claimantId: 'demo-admin-001' } })
+
+  // ---------- Business directory foundation (taxonomy, sources, backfill of providers above) ----------
+  const directory = await runDirectoryFoundation(prisma)
+  console.log('Directory foundation:', JSON.stringify(directory))
 
   console.log('✅ Demo data seeded successfully.')
 }
